@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
+from weakref import ref
 
 __all__ = [
 		'sub',
@@ -16,7 +17,7 @@ def sub(msg, func):
 	assert isinstance(msg, Hashable)
 	assert callable(func)
 	global _pump
-	_pump[msg].add(func)
+	_pump[msg].add(ref(func))
 
 def unsub(msg, func):
 	assert isinstance(msg, Hashable)
@@ -25,7 +26,7 @@ def unsub(msg, func):
 	if msg not in _pump:
 		return
 	try:
-		_pump[msg].remove(func)
+		_pump[msg].remove(ref(func))
 	except KeyError:
 		pass
 	
@@ -34,8 +35,15 @@ def pub(msg, *a, **kw):
 	global _pump
 	if msg not in _pump:
 		return
-	for func in _pump[msg]:
-		func(*a, **kw)
+	removed = []
+	for fref in _pump[msg]:
+		func = fref()
+		if func:
+			func(*a, **kw)
+		else:
+			removed.append(fref)
+	for i in removed:
+		_pump[msg].remove(i)
 
 if __name__ == '__main__':
 	def greet(name):
