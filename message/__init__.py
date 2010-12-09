@@ -3,6 +3,7 @@
 
 __all__ = [
 		'__version__',
+		'__author__',
 		'sub',
 		'unsub',
 		'pub',
@@ -11,4 +12,4 @@ __all__ = [
 from message import sub, unsub, pub
 
 __version__ = '0.0.2'
-
+__author__ = 'LaiYonghao'
