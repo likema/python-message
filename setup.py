@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
-from glob import glob
-
 from setuptools import setup, find_packages
+
+import message
 
 setup(
 	name = 'message',
-	version = '0.0.1',
+	version = message.__version__,
 
 	packages = find_packages(),
 
