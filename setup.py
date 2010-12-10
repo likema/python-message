@@ -24,7 +24,7 @@ setup(
 	packages = find_packages(),
 
 	description = 'A message-oriented programming library for python.',
-	long_description = 'See http://code.google.com/p/python_message for documentation.',
+	long_description = 'See http://code.google.com/p/python-message for documentation.',
 	author = message.__author__,
 	author_email = 'mail@laiyonghao.com',
 
