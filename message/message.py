@@ -1,6 +1,10 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 from weakref import ref
+from copy import copy
+
+from collections import defaultdict as dd
+from collections import Hashable
 
 __all__ = [
 		'sub',
@@ -8,20 +12,17 @@ __all__ = [
 		'pub',
 		'declare',
 		'retract',
+		'get_declarations',
 		]
 
-from collections import defaultdict as dd
-from collections import Hashable
-
-_router = dd(set)
-
+_broker = dd(set)
 _board = {}
 
 def sub(msg, func):
 	assert isinstance(msg, Hashable)
 	assert callable(func)
-	global _router
-	_router[msg].add(ref(func))
+	global _broker
+	_broker[msg].add(ref(func))
 	if msg in _board:
 		a, kw = _board[msg]
 		func(*a, **kw)
@@ -29,28 +30,31 @@ def sub(msg, func):
 def unsub(msg, func):
 	assert isinstance(msg, Hashable)
 	assert callable(func)
-	global _router
-	if msg not in _router:
+	global _broker
+	if msg not in _broker:
 		return
 	try:
-		_router[msg].remove(ref(func))
+		_broker[msg].remove(ref(func))
 	except KeyError:
 		pass
 	
 def pub(msg, *a, **kw):
 	assert isinstance(msg, Hashable)
-	global _router
-	if msg not in _router:
+	global _broker
+	if msg not in _broker:
 		return
 	removed = []
-	for fref in _router[msg]:
+	for fref in copy(_broker[msg]):
 		func = fref()
 		if func:
 			func(*a, **kw)
 		else:
 			removed.append(fref)
 	for i in removed:
-		_router[msg].remove(i)
+		try:
+			_broker[msg].remove(i)
+		except KeyError:
+			pass
 
 def declare(msg, *a, **kw):
 	assert isinstance(msg, Hashable)
@@ -66,6 +70,9 @@ def retract(msg):
 	except KeyError:
 		pass
 
+def get_declarations():
+	return _board.keys()
+
 if __name__ == '__main__':
 	def greet(name):
 		print 'hello, %s.'%name
@@ -79,6 +86,7 @@ if __name__ == '__main__':
 	print '*' * 30
 	sub('greet', greet)
 	declare('greet', 'world')
+	assert get_declarations()
 	
 	def greet2(name):
 		print 'hello, %s. greet2'%name
@@ -86,6 +94,7 @@ if __name__ == '__main__':
 	sub('greet', greet2)
 
 	pub('greet', 'spring')
+
 	
 	retract('greet')
 
@@ -93,5 +102,12 @@ if __name__ == '__main__':
 		print 'hello, %s. greet3'%name
 	
 	sub('greet', greet3)
-#	pub('greet', 'lv')
+
+	print '*' * 30
+	def greet4(name):
+		print 'hello, %s. greet4'%name
+		unsub('greet', greet4)
+	sub('greet', greet4)
+	pub('greet', 'lv')
+	pub('greet', 'ma')
 
