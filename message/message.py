@@ -13,68 +13,86 @@ __all__ = [
 		'declare',
 		'retract',
 		'get_declarations',
+		'has_declaration',
 		]
 
-_broker = dd(set)
+_broker = dd(list)
 _board = {}
 
-def sub(msg, func):
-	assert isinstance(msg, Hashable)
-	assert callable(func)
-	global _broker
-	_broker[msg].add(ref(func))
-	if msg in _board:
-		a, kw = _board[msg]
-		func(*a, **kw)
+class Context(object):
+	def __init__(self):
+		self.discontinued = False
 
-def unsub(msg, func):
-	assert isinstance(msg, Hashable)
+def sub(topic, func, front = False):
+	assert isinstance(topic, Hashable)
 	assert callable(func)
 	global _broker
-	if msg not in _broker:
+	fref = ref(func)
+	if fref in _broker[topic]:
+		return
+	if front:
+		_broker[topic].insert(0, fref)
+	else:
+		_broker[topic].append(fref)
+	if topic in _board:
+		a, kw = _board[topic]
+		func(Context(), *a, **kw)
+
+def unsub(topic, func):
+	assert isinstance(topic, Hashable)
+	assert callable(func)
+	global _broker
+	if topic not in _broker:
 		return
 	try:
-		_broker[msg].remove(ref(func))
-	except KeyError:
+		_broker[topic].remove(ref(func))
+	except ValueError:
 		pass
 	
-def pub(msg, *a, **kw):
-	assert isinstance(msg, Hashable)
+def pub(topic, *a, **kw):
+	assert isinstance(topic, Hashable)
 	global _broker
-	if msg not in _broker:
+	if topic not in _broker:
 		return
 	removed = []
-	for fref in copy(_broker[msg]):
+	context = Context()
+	for fref in copy(_broker[topic]):
 		func = fref()
 		if func:
-			func(*a, **kw)
+			func(context, *a, **kw)
 		else:
 			removed.append(fref)
+		if context.discontinued:
+			break
 	for i in removed:
 		try:
-			_broker[msg].remove(i)
-		except KeyError:
+			_broker[topic].remove(i)
+		except ValueError:
 			pass
 
-def declare(msg, *a, **kw):
-	assert isinstance(msg, Hashable)
+def declare(topic, *a, **kw):
+	assert isinstance(topic, Hashable)
 	global _board
-	_board[msg] = (a, kw)
-	return pub(msg, *a, **kw)
+	_board[topic] = (a, kw)
+	return pub(topic, *a, **kw)
 
-def retract(msg):
-	assert isinstance(msg, Hashable)
+def retract(topic):
+	assert isinstance(topic, Hashable)
 	global _board
 	try:
-		_board.pop(msg)
+		_board.pop(topic)
 	except KeyError:
 		pass
 
 def get_declarations():
 	return _board.keys()
 
+def has_declaration(topic):
+	assert isinstance(topic, Hashable)
+	return topic in _board
+
 if __name__ == '__main__':
-	def greet(name):
+	def greet(context, name):
 		print 'hello, %s.'%name
 	
 	sub('greet', greet)
@@ -82,32 +100,32 @@ if __name__ == '__main__':
 	pub('greet', 'smallfish')
 	pub('greet', 'guido')
 	unsub('greet', greet)
+	unsub('not existed', greet)
 	pub('greet', 'world')
 	print '*' * 30
 	sub('greet', greet)
 	declare('greet', 'world')
 	assert get_declarations()
 	
-	def greet2(name):
+	def greet2(context, name):
 		print 'hello, %s. greet2'%name
 	
 	sub('greet', greet2)
 
 	pub('greet', 'spring')
-
 	
 	retract('greet')
 
-	def greet3(name):
+	def greet3(context, name):
 		print 'hello, %s. greet3'%name
 	
 	sub('greet', greet3)
 
 	print '*' * 30
-	def greet4(name):
+	def greet4(context, name):
 		print 'hello, %s. greet4'%name
 		unsub('greet', greet4)
-	sub('greet', greet4)
+	sub('greet', greet4, front = True)
 	pub('greet', 'lv')
 	pub('greet', 'ma')
 
