@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Module>
+  <ModulePrefs title="SlideShare" title_url="http://www.slideshare.net" author="LaiYonghao" author_email="mail@laiyonghao.com" author_affiliation="SlideShare" author_location="Guangzhou, China" description="Share SlideShare on your google code wiki page." author_link="http://laiyonghao.com" height="320"> 
+  </ModulePrefs>
+  <Content type="html"> 
+  <![CDATA[ 
+<object id="__sse6222245" width="425" height="355"><param name="movie" value="http://static.slidesharecdn.com/swf/ssplayer2.swf?doc=python-message-0-1-0-101218003014-phpapp02&rel=0&stripped_title=pythonmessage010&userName=laiyonghao" /><param name="allowFullScreen" value="true"/><param name="allowScriptAccess" value="always"/><embed name="__sse6222245" src="http://static.slidesharecdn.com/swf/ssplayer2.swf?doc=python-message-0-1-0-101218003014-phpapp02&rel=0&stripped_title=pythonmessage010&userName=laiyonghao" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" width="425" height="355"></embed></object>
+
+  ]]> 
+  </Content> 
+  
+</Module>
