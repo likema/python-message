@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
+
 from weakref import ref
 from copy import copy
 
@@ -7,6 +8,7 @@ from collections import defaultdict as dd
 from collections import Hashable
 
 __all__ = [
+		'Broker',
 		'sub',
 		'unsub',
 		'pub',
@@ -16,80 +18,86 @@ __all__ = [
 		'has_declaration',
 		]
 
-_broker = dd(list)
-_board = {}
-
 class Context(object):
 	def __init__(self):
 		self.discontinued = False
 
-def sub(topic, func, front = False):
-	assert isinstance(topic, Hashable)
-	assert callable(func)
-	global _broker
-	fref = ref(func)
-	if fref in _broker[topic]:
-		return
-	if front:
-		_broker[topic].insert(0, fref)
-	else:
-		_broker[topic].append(fref)
-	if topic in _board:
-		a, kw = _board[topic]
-		func(Context(), *a, **kw)
-
-def unsub(topic, func):
-	assert isinstance(topic, Hashable)
-	assert callable(func)
-	global _broker
-	if topic not in _broker:
-		return
-	try:
-		_broker[topic].remove(ref(func))
-	except ValueError:
-		pass
+class Broker(object):
+	def __init__(self):
+		self._router = dd(list)
+		self._board = {}
 	
-def pub(topic, *a, **kw):
-	assert isinstance(topic, Hashable)
-	global _broker
-	if topic not in _broker:
-		return
-	removed = []
-	context = Context()
-	for fref in copy(_broker[topic]):
-		func = fref()
-		if func:
-			func(context, *a, **kw)
+	def sub(self, topic, func, front = False):
+		assert isinstance(topic, Hashable)
+		assert callable(func)
+		fref = ref(func)
+		if fref in self._router[topic]:
+			return
+		if front:
+			self._router[topic].insert(0, fref)
 		else:
-			removed.append(fref)
-		if context.discontinued:
-			break
-	for i in removed:
+			self._router[topic].append(fref)
+		if topic in self._board:
+			a, kw = self._board[topic]
+			func(Context(), *a, **kw)
+	
+	def unsub(self, topic, func):
+		assert isinstance(topic, Hashable)
+		assert callable(func)
+		if topic not in self._router:
+			return
 		try:
-			_broker[topic].remove(i)
+			self._router[topic].remove(ref(func))
 		except ValueError:
 			pass
+		
+	def pub(self, topic, *a, **kw):
+		assert isinstance(topic, Hashable)
+		if topic not in self._router:
+			return
+		removed = []
+		context = Context()
+		for fref in copy(self._router[topic]):
+			func = fref()
+			if func:
+				func(context, *a, **kw)
+			else:
+				removed.append(fref)
+			if context.discontinued:
+				break
+		for i in removed:
+			try:
+				self._router[topic].remove(i)
+			except ValueError:
+				pass
+	
+	def declare(self, topic, *a, **kw):
+		assert isinstance(topic, Hashable)
+		self._board[topic] = (a, kw)
+		return pub(topic, *a, **kw)
+	
+	def retract(self, topic):
+		assert isinstance(topic, Hashable)
+		try:
+			self._board.pop(topic)
+		except KeyError:
+			pass
+	
+	def get_declarations(self):
+		return self._board.keys()
+	
+	def has_declaration(self, topic):
+		assert isinstance(topic, Hashable)
+		return topic in self._board
 
-def declare(topic, *a, **kw):
-	assert isinstance(topic, Hashable)
-	global _board
-	_board[topic] = (a, kw)
-	return pub(topic, *a, **kw)
-
-def retract(topic):
-	assert isinstance(topic, Hashable)
-	global _board
-	try:
-		_board.pop(topic)
-	except KeyError:
-		pass
-
-def get_declarations():
-	return _board.keys()
-
-def has_declaration(topic):
-	assert isinstance(topic, Hashable)
-	return topic in _board
+_broker = Broker()
+sub = _broker.sub
+unsub = _broker.unsub
+pub = _broker.pub
+declare = _broker.declare
+retract = _broker.retract
+get_declarations = _broker.get_declarations
+has_declaration = _broker.has_declaration
 
 if __name__ == '__main__':
 	def greet(context, name):

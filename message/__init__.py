@@ -2,14 +2,16 @@
 # -*- coding:utf-8 -*-
 
 import message
+import observable
 
 __all__ = [
 		'__version__',
 		'__author__',
-] + message.__all__
+] + message.__all__ + observable.__all__
 
 from message import *
+from observable import *
 
-__version__ = '0.1.0'
+__version__ = '0.2.0'
 __author__ = 'LaiYonghao'
 
