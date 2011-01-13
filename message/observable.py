@@ -60,11 +60,12 @@ def observable(cls):
 # 		return t
 # 
 
-@observable
-class Foo(object):
-	def __init__(self, name):
-		print 'hello, %s.'%name
+if __name__ == '__main__':
+	@observable
+	class Foo(object):
+		def __init__(self, name):
+			print 'hello, %s.'%name
 
-foo = Foo('lai')
-foo.pub('greet')
+	foo = Foo('lai')
+	foo.pub('greet')
 
