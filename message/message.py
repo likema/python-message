@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
-from weakref import ref
 from copy import copy
 
 from collections import defaultdict as dd
@@ -30,13 +29,12 @@ class Broker(object):
 	def sub(self, topic, func, front = False):
 		assert isinstance(topic, Hashable)
 		assert callable(func)
-		fref = ref(func)
-		if fref in self._router[topic]:
+		if func in self._router[topic]:
 			return
 		if front:
-			self._router[topic].insert(0, fref)
+			self._router[topic].insert(0, func)
 		else:
-			self._router[topic].append(fref)
+			self._router[topic].append(func)
 		if topic in self._board:
 			a, kw = self._board[topic]
 			func(Context(), *a, **kw)
@@ -47,7 +45,7 @@ class Broker(object):
 		if topic not in self._router:
 			return
 		try:
-			self._router[topic].remove(ref(func))
+			self._router[topic].remove(func)
 		except ValueError:
 			pass
 		
@@ -57,12 +55,11 @@ class Broker(object):
 			return
 		removed = []
 		context = Context()
-		for fref in copy(self._router[topic]):
-			func = fref()
+		for func in copy(self._router[topic]):
 			if func:
 				func(context, *a, **kw)
 			else:
-				removed.append(fref)
+				removed.append(func)
 			if context.discontinued:
 				break
 		for i in removed:
@@ -136,4 +133,13 @@ if __name__ == '__main__':
 	sub('greet', greet4, front = True)
 	pub('greet', 'lv')
 	pub('greet', 'ma')
+	
+	print '*' * 30
+	class Foo(object):
+		def foo(self, ctx, name):
+			print 'Foo.foo, hello %s.'%name
+
+	foo = Foo()
+	sub('lai', foo.foo)
+	pub('lai', 'lai')
 
