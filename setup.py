@@ -29,7 +29,7 @@ setup(
 	author_email = 'mail@laiyonghao.com',
 
 	license = 'MIT',
-	keywords = ('message-oriented', 'signal-slots', 'observer pattern'),
+	keywords = ('message-oriented', 'signal-slot', 'publish-subscribe'),
 	platforms = 'Independant',
 	url = 'http://code.google.com/p/python-message/',
 	classifiers = classifiers
