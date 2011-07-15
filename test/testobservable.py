@@ -12,6 +12,20 @@ def greet(context, people):
 @observable
 class Foo(object):
 	def __init__(self, name):
+		print 'Foo'
+		self.name = name
+
+#	def sub_greet(self, func):
+#		self.sub('greet', func)
+		self.sub('greet', greet)
+	
+	def pub_greet(self):
+		self.pub('greet', self)
+
+@observable
+class Bar(object):
+	def __init__(self, name):
+		print 'Bar'
 		self.name = name
 
 	def sub_greet(self, func):
@@ -23,13 +37,17 @@ class Foo(object):
 foo = Foo('lai')
 #foo.sub('greet', greet)
 #foo.pub('greet', foo)
-foo.sub_greet(greet)
+#foo.sub_greet(greet)
 foo.pub_greet()
 
-print '*' * 30
-bar = Foo('yong')
-
+# print '*' * 30
+# bar = Foo('yong')
+# 
+# bar.sub('greet', greet)
+# bar.pub('greet', bar)
+# 
+bar = Bar('hao')
 bar.sub('greet', greet)
 bar.pub('greet', bar)
-
+ 
 

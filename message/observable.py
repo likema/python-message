@@ -9,9 +9,11 @@ def observable(cls):
 	t = cls.__init__
 	def __init__(self, *a, **kw):
 #		print 'decorate __init__'
+		b = Broker()
+		self._message_broker = b
 		t(self, *a, **kw)
-		assert not hasattr(self, '_message_broker')
-		self._message_broker = Broker()
+#		cls.__init__(self, *a, **kw)
+		assert id(b) == id(self._message_broker), "_message_broker is a reserved word for observable, don't use it any where."
 
 	def sub(self, *a, **kw):
 		self._message_broker.sub(*a, **kw)
