@@ -37,7 +37,7 @@ class Broker(object):
 			self._router[topic].append(func)
 		if topic in self._board:
 			a, kw = self._board[topic]
-			func(Context(), *a, **kw)
+			func(*a, **kw)
 	
 	def unsub(self, topic, func):
 		assert isinstance(topic, Hashable)
@@ -54,14 +54,16 @@ class Broker(object):
 		if topic not in self._router:
 			return
 		removed = []
-		context = Context()
 		for func in copy(self._router[topic]):
 			if func:
-				func(context, *a, **kw)
+				ctx = func(*a, **kw)
 			else:
 				removed.append(func)
-			if context.discontinued:
-				break
+			try:
+				if ctx and ctx.discontinued:
+					break
+			except (AttributeError, TypeError):
+				pass
 		for i in removed:
 			try:
 				self._router[topic].remove(i)
@@ -97,7 +99,7 @@ get_declarations = _broker.get_declarations
 has_declaration = _broker.has_declaration
 
 if __name__ == '__main__':
-	def greet(context, name):
+	def greet(name):
 		print 'hello, %s.'%name
 	
 	sub('greet', greet)
@@ -112,7 +114,7 @@ if __name__ == '__main__':
 	declare('greet', 'world')
 	assert get_declarations()
 	
-	def greet2(context, name):
+	def greet2(name):
 		print 'hello, %s. greet2'%name
 	
 	sub('greet', greet2)
@@ -121,13 +123,13 @@ if __name__ == '__main__':
 	
 	retract('greet')
 
-	def greet3(context, name):
+	def greet3(name):
 		print 'hello, %s. greet3'%name
 	
 	sub('greet', greet3)
 
 	print '*' * 30
-	def greet4(context, name):
+	def greet4(name):
 		print 'hello, %s. greet4'%name
 		unsub('greet', greet4)
 	sub('greet', greet4, front = True)
@@ -136,7 +138,7 @@ if __name__ == '__main__':
 	
 	print '*' * 30
 	class Foo(object):
-		def foo(self, ctx, name):
+		def foo(self, name):
 			print 'Foo.foo, hello %s.'%name
 
 	foo = Foo()

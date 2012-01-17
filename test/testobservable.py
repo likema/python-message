@@ -6,7 +6,7 @@ sys.path.insert(0, '..')
 
 from message import observable
 
-def greet(context, people):
+def greet(people):
 	print 'hello, %s.'%people.name
 
 @observable

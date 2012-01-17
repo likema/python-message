@@ -49,19 +49,6 @@ def observable(cls):
 		setattr(cls, k, v)
 	return cls
 
-# class Observable(type):
-# 	def __new__(cls, name, bases, attrs):
-# #		super(Observable, cls).__init__(name, bases, attrs)
-# 		t = type.__new__(cls, name, bases, attrs)
-# 		t.__broker = Broker()
-# #		attrs['__broker'] = Broker()
-# 		for k, v in Observable.__dict__.iteritems():
-# 			if not k.startswith('__'):
-# 				assert k not in attrs
-# 				setattr(t, k, v)
-# 		return t
-# 
-
 if __name__ == '__main__':
 	@observable
 	class Foo(object):
