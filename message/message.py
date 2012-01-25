@@ -7,6 +7,7 @@ from collections import defaultdict as dd
 from collections import Hashable
 
 __all__ = [
+		'Context',
 		'Broker',
 		'sub',
 		'unsub',
@@ -18,8 +19,9 @@ __all__ = [
 		]
 
 class Context(object):
-	def __init__(self):
+	def __init__(self, **kw):
 		self.discontinued = False
+		self.__dict__.update(kw)
 
 class Broker(object):
 	def __init__(self):
@@ -133,7 +135,16 @@ if __name__ == '__main__':
 		print 'hello, %s. greet4'%name
 		unsub('greet', greet4)
 	sub('greet', greet4, front = True)
+
+	def greet5(name):
+		print 'hello, %s. greet5'%name
+		print 'discontinued.'
+		ctx = Context()
+		ctx.discontinued = True
+		return ctx
+		
 	pub('greet', 'lv')
+	sub('greet', greet5, front = True)
 	pub('greet', 'ma')
 	
 	print '*' * 30

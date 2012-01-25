@@ -46,8 +46,8 @@ foo.pub_greet()
 # bar.sub('greet', greet)
 # bar.pub('greet', bar)
 # 
-bar = Bar('hao')
-bar.sub('greet', greet)
-bar.pub('greet', bar)
+#bar = Bar('hao')
+#bar.sub('greet', greet)
+#bar.pub('greet', bar)
  
 
