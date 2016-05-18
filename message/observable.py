@@ -1,60 +1,62 @@
-#!/usr/bin/env python
 # -*- coding:utf-8 -*-
-
-__all__ = ['observable']
+# vim: ts=4 sw=4 sts=4 et:
 
 from .message import Broker
 
+__all__ = ['observable']
+
+
 def observable(cls):
-	t = cls.__init__
-	def __init__(self, *a, **kw):
-#		print 'decorate __init__'
-		b = Broker()
-		self._message_broker = b
-		t(self, *a, **kw)
-#		cls.__init__(self, *a, **kw)
-		assert id(b) == id(self._message_broker), "_message_broker is a reserved word for observable, don't use it any where."
+    t = cls.__init__
 
-	def sub(self, *a, **kw):
-		self._message_broker.sub(*a, **kw)
+    def __init__(self, *a, **kw):
+        b = Broker()
+        self._message_broker = b
+        t(self, *a, **kw)
+        assert(id(b) == id(self._message_broker),
+               ("_message_broker is a reserved word for observable, "
+                "don't use it any where."))
 
-	def unsub(self, *a, **kw):
-		self._message_broker.unsub(*a, **kw)
+    def sub(self, *a, **kw):
+        self._message_broker.sub(*a, **kw)
 
-	def pub(self, *a, **kw):
-		self._message_broker.pub(*a, **kw)
+    def unsub(self, *a, **kw):
+        self._message_broker.unsub(*a, **kw)
 
-	def declare(self, *a, **kw):
-		self._message_broker.declare(*a, **kw)
+    def pub(self, *a, **kw):
+        self._message_broker.pub(*a, **kw)
 
-	def retract(self, *a, **kw):
-		self._message_broker.retract(*a, **kw)
+    def declare(self, *a, **kw):
+        self._message_broker.declare(*a, **kw)
 
-	def get_declarations(self, *a, **kw):
-		self._message_broker.get_declarations(*a, **kw)
+    def retract(self, *a, **kw):
+        self._message_broker.retract(*a, **kw)
 
-	def has_declaration(self, *a, **kw):
-		self._message_broker.has_declaration(*a, **kw)
+    def get_declarations(self, *a, **kw):
+        self._message_broker.get_declarations(*a, **kw)
 
-	setattr(cls, '__init__', __init__)
-	
-	for k, v in dict(sub = sub,
-			unsub = unsub,
-			pub = pub,
-			declare = declare, 
-			retract = retract,
-			get_declarations = get_declarations,
-			has_declaration = has_declaration).iteritems():
-		assert not hasattr(cls, k)
-		setattr(cls, k, v)
-	return cls
+    def has_declaration(self, *a, **kw):
+        self._message_broker.has_declaration(*a, **kw)
+
+    setattr(cls, '__init__', __init__)
+
+    for k, v in dict(sub=sub,
+                     unsub=unsub,
+                     pub=pub,
+                     declare=declare,
+                     retract=retract,
+                     get_declarations=get_declarations,
+                     has_declaration=has_declaration).iteritems():
+        assert not hasattr(cls, k)
+        setattr(cls, k, v)
+    return cls
+
 
 if __name__ == '__main__':
-	@observable
-	class Foo(object):
-		def __init__(self, name):
-			print 'hello, %s.'%name
+    @observable
+    class Foo(object):
+        def __init__(self, name):
+            print('hello, %s.' % name)
 
-	foo = Foo('lai')
-	foo.pub('greet')
-
+    foo = Foo('lai')
+    foo.pub('greet')
