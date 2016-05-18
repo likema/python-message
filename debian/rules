@@ -1,4 +1,26 @@
 #!/usr/bin/make -f
 
 %:
-	dh $@ --with python2 --buildsystem=python_distutils
+	dh $@ --with python2,python3 --buildsystem=python_distutils
+
+
+override_dh_auto_clean:
+	python setup.py clean -a
+	python3 setup.py clean -a
+	find . -name \*.pyc -exec rm {} \;
+
+
+
+override_dh_auto_build:
+	python setup.py build --force
+	python3 setup.py build --force
+
+
+
+override_dh_auto_install:
+	python setup.py install --force --root=debian/python-message --no-compile -O0 --install-layout=deb  
+	python3 setup.py install --force --root=debian/python3-message --no-compile -O0 --install-layout=deb  
+
+
+
+

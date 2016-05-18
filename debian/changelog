@@ -1,3 +1,10 @@
+message (0.2.2-2) unstable; urgency=medium
+
+  * Fix python flake8 warnings.
+  * Make message compatible with Python 3.
+
+ -- Like Ma <likemartinma@gmail.com>  Wed, 18 May 2016 20:01:08 +0800
+
 message (0.2.1-1) unstable; urgency=low
 
   * source package automatically created by stdeb.
