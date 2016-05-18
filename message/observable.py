@@ -1,6 +1,7 @@
 # -*- coding:utf-8 -*-
 # vim: ts=4 sw=4 sts=4 et:
 
+from __future__ import absolute_import
 from .message import Broker
 
 __all__ = ['observable']
@@ -13,9 +14,6 @@ def observable(cls):
         b = Broker()
         self._message_broker = b
         t(self, *a, **kw)
-        assert(id(b) == id(self._message_broker),
-               ("_message_broker is a reserved word for observable, "
-                "don't use it any where."))
 
     def sub(self, *a, **kw):
         self._message_broker.sub(*a, **kw)
@@ -40,15 +38,16 @@ def observable(cls):
 
     setattr(cls, '__init__', __init__)
 
-    for k, v in dict(sub=sub,
-                     unsub=unsub,
-                     pub=pub,
-                     declare=declare,
-                     retract=retract,
-                     get_declarations=get_declarations,
-                     has_declaration=has_declaration).iteritems():
+    for k, v in (('sub', sub),
+                 ('unsub', unsub),
+                 ('pub', pub),
+                 ('declare', declare),
+                 ('retract', retract),
+                 ('get_declarations', get_declarations),
+                 ('has_declaration', has_declaration)):
         assert not hasattr(cls, k)
         setattr(cls, k, v)
+
     return cls
 
 
